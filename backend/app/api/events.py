@@ -1,6 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List, Optional
+import os
+import shutil
+import uuid
+from app.core.config import settings
 from datetime import date
 from app.database.session import get_db
 from app.schemas.schemas import EventCreate, EventUpdate, EventOut
@@ -103,6 +107,7 @@ def enrich_event(event: Event, db: Session) -> dict:
         "updated_at": event.updated_at,
         "targets": event.targets,
         "creator_name": creator_name,
+        "attachment_url": event.attachment_url,
     }
 
 
@@ -165,6 +170,7 @@ def create_event(data: EventCreate, db: Session = Depends(get_db), current_user=
         end_time=data.end_time,
         venue=data.venue,
         created_by=current_user.id,
+        attachment_url=data.attachment_url,
     )
     db.add(event)
     db.flush()
@@ -217,6 +223,8 @@ def update_event(event_id: int, data: EventUpdate, db: Session = Depends(get_db)
         event.end_time = data.end_time
     if data.venue is not None:
         event.venue = data.venue
+    if data.attachment_url is not None:
+        event.attachment_url = data.attachment_url
 
     db.commit()
     db.refresh(event)
@@ -253,3 +261,19 @@ def delete_event(event_id: int, db: Session = Depends(get_db), current_user=Depe
     db.delete(event)
     db.commit()
     return {"message": "Event deleted"}
+
+
+@router.post("/upload")
+def upload_event_file(file: UploadFile = File(...), current_user=Depends(get_current_user)):
+    # Ensure upload dir exists
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+    
+    # Generate unique filename
+    file_ext = os.path.splitext(file.filename)[1]
+    unique_filename = f"{uuid.uuid4()}{file_ext}"
+    file_path = os.path.join(settings.UPLOAD_DIR, unique_filename)
+    
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    return {"file_url": f"/uploads/{unique_filename}", "filename": file.filename}

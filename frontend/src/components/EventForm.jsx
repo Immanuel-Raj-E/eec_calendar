@@ -17,6 +17,7 @@ export default function EventForm({ initial, onSubmit, onCancel, userRole, userD
   const [classes, setClasses] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [file, setFile] = useState(null)
 
   useEffect(() => {
     if (userRole === 'admin') {
@@ -32,6 +33,18 @@ export default function EventForm({ initial, onSubmit, onCancel, userRole, userD
     setError('')
     setLoading(true)
     try {
+      let attachment_url = initial?.attachment_url || null
+      if (file) {
+        const formData = new FormData()
+        formData.append('file', file)
+        const uploadRes = await api.post('/events/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+        attachment_url = uploadRes.data.file_url
+      }
+
       const targets = [{
         target_type: form.target_type,
         target_id: form.target_type === 'COLLEGE' ? null : form.target_id ? Number(form.target_id) : null,
@@ -44,6 +57,7 @@ export default function EventForm({ initial, onSubmit, onCancel, userRole, userD
         end_time: form.end_time || null,
         venue: form.venue || null,
         targets,
+        attachment_url,
       }
       await onSubmit(payload)
     } catch (err) {
@@ -57,6 +71,12 @@ export default function EventForm({ initial, onSubmit, onCancel, userRole, userD
     if (userRole === 'admin') return ['COLLEGE', 'DEPARTMENT', 'CLASS']
     if (userRole === 'hod') return ['DEPARTMENT', 'CLASS']
     return ['CLASS']
+  }
+
+  // Helper to construct backend URL for links
+  const getBackendBaseUrl = () => {
+    const apiURL = api.defaults.baseURL || 'http://localhost:8000/api'
+    return apiURL.endsWith('/api') ? apiURL.substring(0, apiURL.length - 4) : apiURL
   }
 
   return (
@@ -114,6 +134,27 @@ export default function EventForm({ initial, onSubmit, onCancel, userRole, userD
           </Select>
         </FormField>
       )}
+
+      <FormField label="Add File (PDF, Image, or circular)">
+        <div className="space-y-2">
+          <input
+            type="file"
+            onChange={e => setFile(e.target.files[0])}
+            className="block w-full text-sm text-gray-500 dark:text-gray-400
+              file:mr-4 file:py-2 file:px-4
+              file:rounded-md file:border-0
+              file:text-sm file:font-semibold
+              file:bg-blue-50 file:text-blue-700
+              hover:file:bg-blue-100
+              dark:file:bg-gray-700 dark:file:text-gray-200"
+          />
+          {initial?.attachment_url && (
+            <p className="text-xs text-gray-500">
+              Current attachment: <a href={`${getBackendBaseUrl()}${initial.attachment_url}`} target="_blank" rel="noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">View Current Attachment</a>
+            </p>
+          )}
+        </div>
+      </FormField>
 
       {error && <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg">{error}</p>}
 

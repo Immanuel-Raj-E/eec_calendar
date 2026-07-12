@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Pencil, Trash2, MapPin, Clock } from 'lucide-react'
+import { Plus, Pencil, Trash2, MapPin, Clock, Paperclip } from 'lucide-react'
 import { Modal, PageHeader, Button, Badge } from '../../components/ui'
 import EventForm from '../../components/EventForm'
 import api from '../../services/api'
@@ -80,6 +80,11 @@ export default function AdminEvents() {
                       <span className="flex items-center gap-1"><MapPin size={11} />{e.venue}</span>
                     )}
                     {e.creator_name && <span>by {e.creator_name}</span>}
+                    {e.attachment_url && (
+                      <a href={`${api.defaults.baseURL.replace('/api', '')}${e.attachment_url}`} target="_blank" rel="noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-medium">
+                        <Paperclip size={11} /> Attachment
+                      </a>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">

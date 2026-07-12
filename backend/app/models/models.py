@@ -124,6 +124,7 @@ class Event(Base):
     start_time = Column(Time, nullable=True)
     end_time = Column(Time, nullable=True)
     venue = Column(String(255), nullable=True)
+    attachment_url = Column(String(500), nullable=True)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
