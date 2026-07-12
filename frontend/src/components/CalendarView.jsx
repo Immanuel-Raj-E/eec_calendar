@@ -5,16 +5,10 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
 import { Modal } from './ui'
-import { MapPin, Clock, User, CalendarDays, Paperclip } from 'lucide-react'
-import api from '../services/api'
+import { MapPin, Clock, User, CalendarDays } from 'lucide-react'
 
 export default function CalendarView({ events }) {
   const [selected, setSelected] = useState(null)
-
-  const getBackendBaseUrl = () => {
-    const apiURL = api.defaults.baseURL || 'http://localhost:8000/api'
-    return apiURL.endsWith('/api') ? apiURL.substring(0, apiURL.length - 4) : apiURL
-  }
 
   const calendarEvents = events.map(e => ({
     id: String(e.id),
@@ -89,14 +83,6 @@ export default function CalendarView({ events }) {
                 <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                   <User size={14} />
                   <span>{selected.creator_name}</span>
-                </div>
-              )}
-              {selected.attachment_url && (
-                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-medium">
-                  <Paperclip size={14} />
-                  <a href={`${getBackendBaseUrl()}${selected.attachment_url}`} target="_blank" rel="noreferrer" className="hover:underline">
-                    View Attachment
-                  </a>
                 </div>
               )}
             </div>

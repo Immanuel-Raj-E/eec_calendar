@@ -135,7 +135,7 @@ export default function EventForm({ initial, onSubmit, onCancel, userRole, userD
         </FormField>
       )}
 
-      <FormField label="Add File (PDF, Image, or circular)">
+      <FormField label="Attachment (PDF, Image, or circular)">
         <div className="space-y-2">
           <input
             type="file"

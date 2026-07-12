@@ -205,7 +205,6 @@ class EventCreate(BaseModel):
     end_time: Optional[time] = None
     venue: Optional[str] = None
     targets: List[EventTargetCreate]
-    attachment_url: Optional[str] = None
 
 
 class EventUpdate(BaseModel):
@@ -215,7 +214,6 @@ class EventUpdate(BaseModel):
     start_time: Optional[time] = None
     end_time: Optional[time] = None
     venue: Optional[str] = None
-    attachment_url: Optional[str] = None
 
 
 class EventTargetOut(BaseModel):
@@ -240,7 +238,6 @@ class EventOut(BaseModel):
     updated_at: datetime
     targets: List[EventTargetOut] = []
     creator_name: Optional[str] = None
-    attachment_url: Optional[str] = None
 
     class Config:
         from_attributes = True
